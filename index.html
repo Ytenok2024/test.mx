@@ -7,31 +7,40 @@
 <body>
 
 <script>
-  function calculateExpressionsFromFile(filePath) {
-    // Используем fetch API для загрузки файла
-    fetch(filePath)
-      .then(response => response.text())
-      .then(data => {
-        // Используем регулярное выражение для поиска всех выражений внутри <??>
-        const regex = /<\?(.*?)\?>/g;
-        let match;
-        // Перебираем все найденные выражения
-        while ((match = regex.exec(data)) !== null) {
-          // Пытаемся вычислить каждое выражение с помощью eval
-          try {
-            const expression = match[1];
-            const result = eval(expression);
-            console.log(`Выражение: ${expression}, Результат: ${result}`);
-          } catch (error) {
-            console.error(`Ошибка при вычислении выражения: ${match[1]}`);
-          }
-        }
-      })
-      .catch(error => console.error('Ошибка при загрузке файла:', error));
-  }
+function print(text) {
+  console.log(text);
+}
 
-  // Вызываем функцию и передаем путь к файлу
-  calculateExpressionsFromFile('server.mx');
+function calculateExpressionsFromFile(filePath) {
+  // Используем fetch API для загрузки файла
+  fetch(filePath)
+    .then(response => response.text())
+    .then(data => {
+      // Используем регулярное выражение для поиска всех выражений внутри <??>
+      const regex = /<\?(.*?)\?>/g;
+      let match;
+      // Перебираем все найденные выражения
+      while ((match = regex.exec(data)) !== null) {
+        // Пытаемся вычислить каждое выражение с помощью eval
+        try {
+          const expression = match[1];
+          const result = eval(expression);
+          print(`Выражение: ${expression}, Результат: ${result}`);
+        } catch (error) {
+          console.error(`Ошибка при вычислении выражения: ${match[1]}`);
+        }
+      }
+      // Добавляем обработку команды print
+      const printRegex = /print\("([^"]*)"\)/g;
+      while ((match = printRegex.exec(data)) !== null) {
+        print(match[1]);
+      }
+    })
+    .catch(error => console.error('Ошибка при загрузке файла:', error));
+}
+
+// Вызываем функцию и передаем путь к файлу
+calculateExpressionsFromFile('server.mx');
 </script>
 
 </body>
