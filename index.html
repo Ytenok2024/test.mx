@@ -1,14 +1,9 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <title>MX File Processor</title>
-</head>
-<body>
-
-<script>
 function print(text) {
   console.log(text);
+}
+
+function error(text) {
+  console.error(text);
 }
 
 function calculateExpressionsFromFile(filePath) {
@@ -27,7 +22,7 @@ function calculateExpressionsFromFile(filePath) {
           const result = eval(expression);
           print(`Выражение: ${expression}, Результат: ${result}`);
         } catch (error) {
-          console.error(`Ошибка при вычислении выражения: ${match[1]}`);
+          error(`Ошибка при вычислении выражения: ${match[1]}`);
         }
       }
       // Добавляем обработку команды print
@@ -36,12 +31,8 @@ function calculateExpressionsFromFile(filePath) {
         print(match[1]);
       }
     })
-    .catch(error => console.error('Ошибка при загрузке файла:', error));
+    .catch(error => error('Ошибка при загрузке файла:', error));
 }
 
 // Вызываем функцию и передаем путь к файлу
 calculateExpressionsFromFile('server.mx');
-</script>
-
-</body>
-</html>
