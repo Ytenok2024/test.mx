@@ -1,3 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Вычисление Выражений</title>
+<style>
+/* Добавьте сюда стили для красивого оформления вашего сайта */
+body {
+font-family: Arial, sans-serif;
+background-color: #f7f7f7;
+margin: 0;
+padding: 20px;
+}
+.container {
+max-width: 600px;
+margin: auto;
+background-color: #fff;
+padding: 20px;
+box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Вычисление Выражений</h1>
+<!-- Сюда можно добавить дополнительный контент -->
+</div>
+<script>
 function print(text) {
 console.log(text);
 }
@@ -7,33 +36,20 @@ function calculateExpressionsFromFile(filePath) {
 fetch(filePath)
 .then(response => response.text())
 .then(data => {
-// Используем регулярное выражение для поиска всех выражений внутри <??>
-const regex = /<?(.*?)?>/g;
+// Исправленное регулярное выражение для поиска выражений
+const regex = /<\?(.*?)\?>/g;
 let match;
-// Перебираем все найденные выражения
 while ((match = regex.exec(data)) !== null) {
-// Пытаемся вычислить каждое выражение с помощью eval
 try {
 const expression = match[1];
 const result = eval(expression);
-print(Выражение: ${expression}, Результат: ${result});
+print(`Выражение: ${expression}, Результат: ${result}`);
 } catch (error) {
-console.error(Ошибка при вычислении выражения: ${match[1]});
+console.error(`Ошибка при вычислении выражения: ${match[1]}`);
 }
 }
-// Добавляем обработку команды print
-const printRegex = /print
-"
-(
-[
-"
-]
-∗
-)
-"
-"([ 
-"
- ]∗)"/g;
+// Исправленное регулярное выражение для обработки команды print
+const printRegex = /print\("([^"]*)"\)/g;
 while ((match = printRegex.exec(data)) !== null) {
 print(match[1]);
 }
@@ -43,3 +59,6 @@ print(match[1]);
 
 // Вызываем функцию и передаем путь к файлу
 calculateExpressionsFromFile('server.mx');
+</script>
+</body>
+</html>
