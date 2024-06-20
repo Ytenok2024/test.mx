@@ -7,8 +7,3 @@ print("test")
 <?7-5?>
 <?65-3?>
 <?72/8?>
-error("Неисправная ошибка")
-var Test = 5
-var USA = 8
-var Andromeda = 6
-<?USA+TEST?>
