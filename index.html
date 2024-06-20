@@ -38,28 +38,38 @@
         }
 
         function calculateExpressions(data) {
-            const regex = /<\?(.*?)\?>/g;
-            let match;
-            while ((match = regex.exec(data)) !== null) {
-                try {
-                    const expression = match[1];
-                    const result = eval(expression);
-                    print(`Выражение: ${expression}, Результат: ${result}`);
-                } catch (error) {
-                    console.error(`Ошибка при вычислении выражения: ${match[1]}`);
-                }
-            }
+    // Сначала ищем и создаем переменные
+    const newVarRegex = /number\.new\("([^"]*)",\s*(.*?)\)/g;
+    let match;
+    while ((match = newVarRegex.exec(data)) !== null) {
+        newVariable(match[1], match[2]);
+    }
 
-            const printRegex = /print\("([^"]*)"\)/g;
-            while ((match = printRegex.exec(data)) !== null) {
-                print(match[1]);
+    // Затем обрабатываем остальные выражения
+    const regex = /<\?(.*?)\?>/g;
+    while ((match = regex.exec(data)) !== null) {
+        try {
+            // Проверяем, не является ли выражение командой создания переменной
+            if (!newVarRegex.test(match[1])) {
+                const expression = match[1];
+                const result = eval(expression);
+                print(`Выражение: ${expression}, Результат: ${result}`);
             }
-
-            const newVarRegex = /number\.new\("([^"]*)",\s*(.*?)\)/g;
-            while ((match = newVarRegex.exec(data)) !== null) {
-                newVariable(match[1], match[2]);
-            }
+        } catch (error) {
+            console.error(`Ошибка при вычислении выражения: ${match[1]}`);
         }
+    }
+
+    // Обработка команд print
+    const printRegex = /print\("([^"]*)"\)/g;
+    while ((match = printRegex.exec(data)) !== null) {
+        // Проверяем, не является ли строка командой создания переменной
+        if (!newVarRegex.test(match[1])) {
+            print(match[1]);
+        }
+    }
+}
+
     </script>
 </body>
 </html>
