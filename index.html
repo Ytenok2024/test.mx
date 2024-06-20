@@ -44,7 +44,7 @@
                             const expression = match[1];
                             const result = eval(expression);
                             print(\`Выражение: \${expression}, Результат: \${result}\`);
-                        } catch (error) {
+                        } catch (e) {
                             error(\`Ошибка при вычислении выражения: \${match[1]}\`);
                         }
                     }
@@ -61,7 +61,7 @@
                         newVariable(match[1], match[2]);
                     }
                 })
-                .catch(error => error('Ошибка при загрузке файла: ' + error));
+                .catch(e => error('Ошибка при загрузке файла: ' + e.message));
         }
 
         // Прикрепляем событие клика к кнопке
