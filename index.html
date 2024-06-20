@@ -19,7 +19,7 @@
         function numberNew(name, value) {
             if (!isNaN(value)) {
                 variables[name] = Number(value);
-                print(\`Переменная \${name} создана со значением \${value}\`);
+                console.log(\`Переменная \${name} создана со значением \${value}\`);
             } else {
                 console.error(\`Значение для переменной \${name} не является числом\`);
             }
