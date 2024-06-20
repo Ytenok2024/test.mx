@@ -19,7 +19,7 @@
         function numberNew(name, value) {
             if (!isNaN(value)) {
                 variables[name] = Number(value);
-                console.log(\`Переменная \${name} создана со значением \${value}\`);
+                print(\`Переменная \${name} создана со значением \${value}\`);
             } else {
                 console.error(\`Значение для переменной \${name} не является числом\`);
             }
@@ -31,7 +31,7 @@
                 .then(response => response.text())
                 .then(data => {
                     // Используем регулярное выражение для поиска всех выражений внутри <??>
-                    const regex = /<\\?(.*?)\\?>/g;
+                    const regex = /<\\\\?(.*?)\\\\?>/g;
                     let match;
                     while ((match = regex.exec(data)) !== null) {
                         try {
@@ -43,12 +43,12 @@
                         }
                     }
                     // Добавляем обработку команды print
-                    const printRegex = /print\\("(.*?)"\\)/g;
+                    const printRegex = /print\\\\("(.*?)"\\\\)/g;
                     while ((match = printRegex.exec(data)) !== null) {
                         print(match[1]);
                     }
                     // Добавляем обработку команды numberNew
-                    const numberNewRegex = /#number\\.new\\("(.+?)",\\s*(.+?)\\)/g;
+                    const numberNewRegex = /#number\\.new\\\\("(.+?)",\\\\s*(.+?)\\\\)/g;
                     while ((match = numberNewRegex.exec(data)) !== null) {
                         numberNew(match[1], match[2]);
                     }
