@@ -1,93 +1,65 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Вычисление Выражений</title>
-<style>
-/* Добавьте сюда стили для красивого оформления вашего сайта */
-body {
-font-family: Arial, sans-serif;
-background-color: #f7f7f7;
-margin: 0;
-padding: 20px;
-}
-.container {
-max-width: 600px;
-margin: auto;
-background-color: #fff;
-padding: 20px;
-box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-</style>
+    <meta charset="UTF-8">
+    <title>Вычисление Выражений</title>
 </head>
 <body>
-<div class="container">
-<h1>Вычисление Выражений</h1>
-<!-- Сюда можно добавить дополнительный контент -->
-</div>
-<script>
-function print(text) {
-console.log(text);
-}
+    <h1>Вычисление выражений из файла</h1>
+    <button id="calculate">Вычислить выражения</button>
+    <script>
+        function print(text) {
+            console.log(text);
+        }
 
-function calculateExpressionsFromFile(filePath) {
-// Используем fetch API для загрузки файла
-fetch(filePath)
-.then(response => response.text())
-.then(data => {
-// Используем регулярное выражение для поиска всех выражений внутри <??>
-const regex = /<?(.*?)?>/g;
-let match;
-// Перебираем все найденные выражения
-while ((match = regex.exec(data)) !== null) {
-// Пытаемся вычислить каждое выражение с помощью eval
-try {
-const expression = match[1];
-const result = eval(expression);
-print(Выражение: 
-�
-�
-�
-�
-�
-�
-�
-�
-�
-�
-,
-Результат
-:
-expression,Результат:{result});
-} catch (error) {
-console.error(Ошибка при вычислении выражения: ${match[1]});
-}
-}
-// Добавляем обработку команды print
-const printRegex = /print
-"
-(
-[
-"
-]
-∗
-)
-"
-"([
-"
-]∗)"/g;
-while ((match = printRegex.exec(data)) !== null) {
-print(match[1]);
-}
-})
-.catch(error => console.error('Ошибка при загрузке файла:', error));
-}
+        // Объект для хранения переменных
+        const variables = {};
 
-// Вызываем функцию и передаем путь к файлу
-calculateExpressionsFromFile('server.mx');
-</script>
+        // Функция для создания новой переменной
+        function numberNew(name, value) {
+            if (!isNaN(value)) {
+                variables[name] = Number(value);
+                print(\`Переменная \${name} создана со значением \${value}\`);
+            } else {
+                console.error(\`Значение для переменной \${name} не является числом\`);
+            }
+        }
+
+        function calculateExpressionsFromFile(filePath) {
+            // Используем fetch API для загрузки файла
+            fetch(filePath)
+                .then(response => response.text())
+                .then(data => {
+                    // Используем регулярное выражение для поиска всех выражений внутри <??>
+                    const regex = /<\\?(.*?)\\?>/g;
+                    let match;
+                    while ((match = regex.exec(data)) !== null) {
+                        try {
+                            const expression = match[1];
+                            const result = eval(expression);
+                            print(\`Выражение: \${expression}, Результат: \${result}\`);
+                        } catch (error) {
+                            console.error(\`Ошибка при вычислении выражения: \${match[1]}\`);
+                        }
+                    }
+                    // Добавляем обработку команды print
+                    const printRegex = /print\\("(.*?)"\\)/g;
+                    while ((match = printRegex.exec(data)) !== null) {
+                        print(match[1]);
+                    }
+                    // Добавляем обработку команды numberNew
+                    const numberNewRegex = /#number\\.new\\("(.+?)",\\s*(.+?)\\)/g;
+                    while ((match = numberNewRegex.exec(data)) !== null) {
+                        numberNew(match[1], match[2]);
+                    }
+                })
+                .catch(error => console.error('Ошибка при загрузке файла:', error));
+        }
+
+        // Прикрепляем событие клика к кнопке
+        document.getElementById('calculate').addEventListener('click', function() {
+            calculateExpressionsFromFile('server.mx');
+        });
+    </script>
 </body>
 </html>
-
-
