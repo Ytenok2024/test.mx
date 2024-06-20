@@ -1,50 +1,65 @@
-function print(text) {
-    console.log(text);
-}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Обработка Выражений</title>
+</head>
+<body>
+    <h1>Обработка выражений из файла</h1>
+    <input type="file" id="fileInput">
+    <button onclick="loadAndCalculate()">Загрузить и Вычислить</button>
+    <script>
+        function print(text) {
+            console.log(text);
+        }
 
-// Функция для создания новой переменной
-function newVariable(name, value) {
-    if (!isNaN(value)) {
-        // Если значение является числом, сохраняем его как числовую переменную
-        window[name] = Number(value);
-        print(`Переменная ${name} создана со значением ${value}`);
-    } else {
-        print(`Ошибка: Значение для переменной ${name} не является числом`);
-    }
-}
-
-function calculateExpressionsFromFile(filePath) {
-    // Используем fetch API для загрузки файла
-    fetch(filePath)
-    .then(response => response.text())
-    .then(data => {
-        // Регулярное выражение для поиска выражений
-        const regex = /<\?(.*?)\?>/g;
-        let match;
-        while ((match = regex.exec(data)) !== null) {
-            try {
-                const expression = match[1];
-                const result = eval(expression);
-                print(`Выражение: ${expression}, Результат: ${result}`);
-            } catch (error) {
-                console.error(`Ошибка при вычислении выражения: ${match[1]}`);
+        function newVariable(name, value) {
+            if (!isNaN(value)) {
+                window[name] = Number(value);
+                print(`Переменная ${name} создана со значением ${value}`);
+            } else {
+                print(`Ошибка: Значение для переменной ${name} не является числом`);
             }
         }
 
-        // Регулярное выражение для обработки команды print
-        const printRegex = /print\("([^"]*)"\)/g;
-        while ((match = printRegex.exec(data)) !== null) {
-            print(match[1]);
+        function loadAndCalculate() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    calculateExpressions(content);
+                };
+                reader.readAsText(file);
+            } else {
+                print('Файл не выбран');
+            }
         }
 
-        // Регулярное выражение для обработки команды number.new
-        const newVarRegex = /number\.new\("([^"]*)",\s*(.*?)\)/g;
-        while ((match = newVarRegex.exec(data)) !== null) {
-            newVariable(match[1], match[2]);
-        }
-    })
-    .catch(error => console.error('Ошибка при загрузке файла:', error));
-}
+        function calculateExpressions(data) {
+            const regex = /<\?(.*?)\?>/g;
+            let match;
+            while ((match = regex.exec(data)) !== null) {
+                try {
+                    const expression = match[1];
+                    const result = eval(expression);
+                    print(`Выражение: ${expression}, Результат: ${result}`);
+                } catch (error) {
+                    console.error(`Ошибка при вычислении выражения: ${match[1]}`);
+                }
+            }
 
-// Вызываем функцию и передаем путь к файлу
-calculateExpressionsFromFile('server.mx');
+            const printRegex = /print\("([^"]*)"\)/g;
+            while ((match = printRegex.exec(data)) !== null) {
+                print(match[1]);
+            }
+
+            const newVarRegex = /number\.new\("([^"]*)",\s*(.*?)\)/g;
+            while ((match = newVarRegex.exec(data)) !== null) {
+                newVariable(match[1], match[2]);
+            }
+        }
+    </script>
+</body>
+</html>
