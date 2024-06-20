@@ -1,74 +1,128 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<title>Игра с файлом Server.mx</title>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  fetch('server.mx')
-    .then(response => response.text())
-    .then(data => {
-      // Сначала ищем и создаем переменные
-      const newVarRegex = /number\\.new\\("([^"]*)",\\s*(.*?)\\)/g;
-      let match;
-      while ((match = newVarRegex.exec(data)) !== null) {
-        newVariable(match[1], match[2]);
-      }
-
-      // Затем обрабатываем остальные выражения
-      const regex = /<\\?(.*?)\\?>/g;
-      while ((match = regex.exec(data)) !== null) {
-        try {
-          // Проверяем, не является ли выражение командой создания переменной
-          if (!newVarRegex.test(match[1])) {
-            const expression = match[1];
-            const result = eval(expression);
-            print(`Выражение: ${expression}, Результат: ${result}`);
-          }
-        } catch (error) {
-          console.error(`Ошибка при вычислении выражения: ${match[1]}`);
+    <meta charset="UTF-8">
+    <title>Обработка Выражений</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
         }
-      }
 
-      // Обработка команд print
-      const printRegex = /print\\("([^"]*)"\\)/g;
-      while ((match = printRegex.exec(data)) !== null) {
-        // Проверяем, не является ли строка командой создания переменной
-        if (!newVarRegex.test(match[1])) {
-          print(match[1]);
+        h1 {
+            color: #333;
         }
-      }
-    })
-    .catch(error => {
-      console.error('Ошибка при загрузке файла Game.mx:', error);
-    });
-});
 
-function print(text) {
-  console.log(text);
-}
+        #fileInput {
+            margin-bottom: 10px;
+        }
 
-function newVariable(name, value) {
-  if (!isNaN(value)) {
-    window[name] = Number(value);
-    print(`Переменная ${name} создана со значением ${value}`);
-  } else {
-    print(`Ошибка: Значение для переменной ${name} не является числом`);
-  }
-}
+        button {
+            background-color: #008CBA;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
 
-function numberSet(name, value) {
-  if (window[name] !== undefined && !isNaN(value)) {
-    window[name] = Number(value);
-    print(`Значение переменной ${name} изменено на ${value}`);
-  } else {
-    print(`Ошибка: Переменная ${name} не существует или значение не является числом`);
-  }
-}
-</script>
+        button:hover {
+            background-color: #005f73;
+        }
+
+        button:active {
+            transform: scale(0.98); /* Slightly shrink the button */
+        }
+
+        /* Анимация для кнопки */
+        @keyframes buttonAnimation {
+            0% { background-color: #008CBA; }
+            50% { background-color: #005f73; }
+            100% { background-color: #008CBA; }
+        }
+
+        button:focus {
+            animation: buttonAnimation 1s infinite;
+        }
+    </style>
 </head>
 <body>
-<h1>Добро пожаловать в игру!</h1>
-<p>Файл Game.mx будет автоматически загружен и обработан при загрузке этой страницы.</p>
+    <h1>Обработка выражений из файла</h1>
+    <input type="file" id="fileInput" accept=".mx">
+    <button onclick="loadAndCalculate()">Загрузить и Вычислить</button>
+    <script>
+        function print(text) {
+            console.log(text);
+        }
+
+        function newVariable(name, value) {
+            if (!isNaN(value)) {
+                window[name] = Number(value);
+                print(`Переменная ${name} создана со значением ${value}`);
+            } else {
+                print(`Ошибка: Значение для переменной ${name} не является числом`);
+            }
+        }
+
+        function numberSet(name, value) {
+            if (window[name] !== undefined && !isNaN(value)) {
+                window[name] = Number(value);
+                print(`Значение переменной ${name} изменено на ${value}`);
+            } else {
+                print(`Ошибка: Переменная ${name} не существует или значение не является числом`);
+            }
+        }
+
+        function loadAndCalculate() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    calculateExpressions(content);
+                };
+                reader.readAsText(file);
+            } else {
+                print('Файл не выбран');
+            }
+        }
+
+        function calculateExpressions(data) {
+            // Сначала ищем и создаем переменные
+            const newVarRegex = /number\.new\("([^"]*)",\s*(.*?)\)/g;
+            let match;
+            while ((match = newVarRegex.exec(data)) !== null) {
+                newVariable(match[1], match[2]);
+            }
+
+            // Затем обрабатываем остальные выражения
+            const regex = /<\?(.*?)\?>/g;
+            while ((match = regex.exec(data)) !== null) {
+                try {
+                    // Проверяем, не является ли выражение командой создания переменной
+                    if (!newVarRegex.test(match[1])) {
+                        const expression = match[1];
+                        const result = eval(expression);
+                        print(`Выражение: ${expression}, Результат: ${result}`);
+                    }
+                } catch (error) {
+                    console.error(`Ошибка при вычислении выражения: ${match[1]}`);
+                }
+            }
+
+            // Обработка команд print
+            const printRegex = /print\("([^"]*)"\)/g;
+            while ((match = printRegex.exec(data)) !== null) {
+                // Проверяем, не является ли строка командой создания переменной
+                if (!newVarRegex.test(match[1])) {
+                    print(match[1]);
+                }
+            }
+        }
+    </script>
 </body>
 </html>
