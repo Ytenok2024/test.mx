@@ -70,6 +70,20 @@
             }
 
             // Обработка команд print
+            function checkAndExecute(var1, var2) {
+    if (window[var1] !== undefined && window[var2] !== undefined) {
+        if (window[var1] === window[var2]) {
+            // Тут можно добавить скрипты, которые должны выполниться, если переменные равны
+            // Например, создание новой переменной:
+            numberNew('a', 5);
+            print(`Переменные ${var1} и ${var2} равны. Выполнен скрипт number.new("a", 5)`);
+        } else {
+            print(`Переменные ${var1} и ${var2} не равны.`);
+        }
+    } else {
+        print(`Одна из переменных не существует.`);
+    }
+}
             const printRegex = /print\("([^"]*)"\)/g;
             while ((match = printRegex.exec(data)) !== null) {
                 // Проверяем, не является ли строка командой создания переменной
