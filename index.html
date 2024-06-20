@@ -40,25 +40,38 @@ function calculateExpressionsFromFile(filePath) {
   fetch(filePath)
     .then(response => response.text())
     .then(data => {
-      // Используем регулярное выражение для поиска всех выражений внутри <??>
+      // Регулярное выражение для поиска выражений внутри <??>
       const regex = /<\?(.*?)\?>/g;
       let match;
+      // Объект для хранения переменных
+      let variables = {};
+
       // Перебираем все найденные выражения
       while ((match = regex.exec(data)) !== null) {
-        // Пытаемся вычислить каждое выражение с помощью eval
         try {
           const expression = match[1];
+          // Вычисляем выражение и сохраняем результат в переменной
           const result = eval(expression);
           print(`Выражение: ${expression}, Результат: ${result}`);
         } catch (error) {
           error(`Ошибка при вычислении выражения: ${match[1]}`);
         }
       }
-      // Добавляем обработку команды print
-      const printRegex = /print\("([^"]*)"\)/g;
-      while ((match = printRegex.exec(data)) !== null) {
-        print(match[1]);
+
+      // Регулярное выражение для создания переменных
+      const varRegex = /var\s+(\w+)\s*=\s*(.*?);/g;
+      while ((match = varRegex.exec(data)) !== null) {
+        try {
+          // Создаем переменную и присваиваем ей значение
+          variables[match[1]] = eval(match[2]);
+          print(`Переменная: ${match[1]}, Значение: ${variables[match[1]]}`);
+        } catch (error) {
+          error(`Ошибка при создании переменной: ${match[1]}`);
+        }
       }
+
+      // Выводим созданные переменные
+      console.log(variables);
     })
     .catch(error => error('Ошибка при загрузке файла: ' + error));
 }
