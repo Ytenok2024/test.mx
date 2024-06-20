@@ -28,57 +28,64 @@ box-shadow: 0 0 10px rgba(0,0,0,0.1);
 </div>
 <script>
 function print(text) {
-  console.log(text);
-}
-
-function error(text) {
-  console.error(text);
+console.log(text);
 }
 
 function calculateExpressionsFromFile(filePath) {
-  // Используем fetch API для загрузки файла
-  fetch(filePath)
-    .then(response => response.text())
-    .then(data => {
-      // Регулярное выражение для поиска выражений внутри <??>
-      const regex = /<\?(.*?)\?>/g;
-      let match;
-      // Объект для хранения переменных
-      let variables = {};
-
-      // Перебираем все найденные выражения
-      while ((match = regex.exec(data)) !== null) {
-        try {
-          const expression = match[1];
-          // Вычисляем выражение и сохраняем результат в переменной
-          const result = eval(expression);
-          print(`Выражение: ${expression}, Результат: ${result}`);
-        } catch (error) {
-          error(`Ошибка при вычислении выражения: ${match[1]}`);
-        }
-      }
-
-      // Регулярное выражение для создания переменных
-      const varRegex = /var\s+(\w+)\s*=\s*(.*?);/g;
-      while ((match = varRegex.exec(data)) !== null) {
-        try {
-          // Создаем переменную и присваиваем ей значение
-          variables[match[1]] = eval(match[2]);
-          print(`Переменная: ${match[1]}, Значение: ${variables[match[1]]}`);
-        } catch (error) {
-          error(`Ошибка при создании переменной: ${match[1]}`);
-        }
-      }
-
-      // Выводим созданные переменные
-      console.log(variables);
-    })
-    .catch(error => error('Ошибка при загрузке файла: ' + error));
+// Используем fetch API для загрузки файла
+fetch(filePath)
+.then(response => response.text())
+.then(data => {
+// Используем регулярное выражение для поиска всех выражений внутри <??>
+const regex = /<?(.*?)?>/g;
+let match;
+// Перебираем все найденные выражения
+while ((match = regex.exec(data)) !== null) {
+// Пытаемся вычислить каждое выражение с помощью eval
+try {
+const expression = match[1];
+const result = eval(expression);
+print(Выражение: 
+�
+�
+�
+�
+�
+�
+�
+�
+�
+�
+,
+Результат
+:
+expression,Результат:{result});
+} catch (error) {
+console.error(Ошибка при вычислении выражения: ${match[1]});
+}
+}
+// Добавляем обработку команды print
+const printRegex = /print
+"
+(
+[
+"
+]
+∗
+)
+"
+"([
+"
+]∗)"/g;
+while ((match = printRegex.exec(data)) !== null) {
+print(match[1]);
+}
+})
+.catch(error => console.error('Ошибка при загрузке файла:', error));
 }
 
 // Вызываем функцию и передаем путь к файлу
 calculateExpressionsFromFile('server.mx');
-
 </script>
 </body>
 </html>
