@@ -8,52 +8,60 @@
     <h1>Вычисление выражений из файла</h1>
     <button id="calculate">Вычислить выражения</button>
     <script>
+        // Объект для хранения переменных
+        const variables = {};
+
+        // Функция для вывода текста в консоль
         function print(text) {
             console.log(text);
         }
 
-        // Объект для хранения переменных
-        const variables = {};
+        // Функция для вывода ошибки
+        function error(text) {
+            console.error(text);
+        }
 
         // Функция для создания новой переменной
-        function numberNew(name, value) {
+        function newVariable(name, value) {
             if (!isNaN(value)) {
                 variables[name] = Number(value);
                 print(\`Переменная \${name} создана со значением \${value}\`);
             } else {
-                console.error(\`Значение для переменной \${name} не является числом\`);
+                error(\`Значение для переменной \${name} не является числом\`);
             }
         }
 
+        // Функция для вычисления выражений из файла
         function calculateExpressionsFromFile(filePath) {
-            // Используем fetch API для загрузки файла
             fetch(filePath)
                 .then(response => response.text())
                 .then(data => {
-                    // Используем регулярное выражение для поиска всех выражений внутри <??>
-                    const regex = /<\\\\?(.*?)\\\\?>/g;
+                    // Регулярное выражение для поиска выражений внутри <??>
+                    const expressionRegex = /<\\?(.*?)\\?>/g;
                     let match;
-                    while ((match = regex.exec(data)) !== null) {
+                    while ((match = expressionRegex.exec(data)) !== null) {
                         try {
                             const expression = match[1];
                             const result = eval(expression);
                             print(\`Выражение: \${expression}, Результат: \${result}\`);
                         } catch (error) {
-                            console.error(\`Ошибка при вычислении выражения: \${match[1]}\`);
+                            error(\`Ошибка при вычислении выражения: \${match[1]}\`);
                         }
                     }
-                    // Добавляем обработку команды print
-                    const printRegex = /print\\\\("(.*?)"\\\\)/g;
+
+                    // Регулярное выражение для обработки команды print
+                    const printRegex = /print\\("(.*?)"\\)/g;
                     while ((match = printRegex.exec(data)) !== null) {
                         print(match[1]);
                     }
-                    // Добавляем обработку команды numberNew
-                    const numberNewRegex = /#number\\.new\\\\("(.+?)",\\\\s*(.+?)\\\\)/g;
-                    while ((match = numberNewRegex.exec(data)) !== null) {
-                        numberNew(match[1], match[2]);
+
+                    // Регулярное выражение для обработки команды new
+                    const newRegex = /<new\\("(.*?)")>=<(.*)>/g;
+                    while ((match = newRegex.exec(data)) !== null) {
+                        newVariable(match[1], match[2]);
                     }
                 })
-                .catch(error => console.error('Ошибка при загрузке файла:', error));
+                .catch(error => error('Ошибка при загрузке файла: ' + error));
         }
 
         // Прикрепляем событие клика к кнопке
