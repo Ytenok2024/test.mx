@@ -1,16 +1,22 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Игра с файлом Game.mx</title>
+<script>
 document.addEventListener('DOMContentLoaded', function() {
   fetch('Game.mx')
     .then(response => response.text())
     .then(data => {
       // Сначала ищем и создаем переменные
-      const newVarRegex = /number\.new\("([^"]*)",\s*(.*?)\)/g;
+      const newVarRegex = /number\\.new\\("([^"]*)",\\s*(.*?)\\)/g;
       let match;
       while ((match = newVarRegex.exec(data)) !== null) {
         newVariable(match[1], match[2]);
       }
 
       // Затем обрабатываем остальные выражения
-      const regex = /<\?(.*?)\?>/g;
+      const regex = /<\\?(.*?)\\?>/g;
       while ((match = regex.exec(data)) !== null) {
         try {
           // Проверяем, не является ли выражение командой создания переменной
@@ -25,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       // Обработка команд print
-      const printRegex = /print\("([^"]*)"\)/g;
+      const printRegex = /print\\("([^"]*)"\\)/g;
       while ((match = printRegex.exec(data)) !== null) {
         // Проверяем, не является ли строка командой создания переменной
         if (!newVarRegex.test(match[1])) {
@@ -59,3 +65,10 @@ function numberSet(name, value) {
     print(`Ошибка: Переменная ${name} не существует или значение не является числом`);
   }
 }
+</script>
+</head>
+<body>
+<h1>Добро пожаловать в игру!</h1>
+<p>Файл Game.mx будет автоматически загружен и обработан при загрузке этой страницы.</p>
+</body>
+</html>
