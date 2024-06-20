@@ -54,7 +54,7 @@
     <input type="file" id="fileInput" accept=".mx">
     <button onclick="loadAndCalculate()">Загрузить и Вычислить</button>
     <script>
-        function print(text) {
+function print(text) {
     console.log(text);
 }
 
@@ -96,32 +96,28 @@ function loadAndCalculate() {
 }
 
 function calculateExpressions(data) {
-    const newVarRegex = /number\.new\("([^"]*)",\s*(.*?)\)/g;
-    let match;
-    while ((match = newVarRegex.exec(data)) !== null) {
-        newVariable(match[1], match[2]);
-    }
-
-    const errorRegex = /error\("([^"]*)"\)/g;
-    while ((match = errorRegex.exec(data)) !== null) {
-        error(match[1]);
-    }
-
-    const printRegex = /print\("([^"]*)"\)/g;
-    while ((match = printRegex.exec(data)) !== null) {
-        print(match[1]);
-    }
-
-    const regex = /<\?(.*?)\?>/g;
-    while ((match = regex.exec(data)) !== null) {
-        try {
-            if (!newVarRegex.test(match[1]) && !errorRegex.test(match[1]) && !printRegex.test(match[1])) {
-                const expression = match[1];
+    const commands = data.split('\n'); // Разделяем данные на строки
+    for (let command of commands) {
+        if (command.startsWith('<?') && command.endsWith('?>')) {
+            // Обработка математических выражений
+            const expression = command.slice(2, -2).trim();
+            try {
                 const result = eval(expression);
                 print(`Выражение: ${expression}, Результат: ${result}`);
+            } catch (e) {
+                error(`Ошибка при вычислении выражения: ${expression}`);
             }
-        } catch (e) {
-            error(`Ошибка при вычислении выражения: ${match[1]}`);
+        } else if (command.startsWith('error("') && command.endsWith('")')) {
+            // Обработка команд error
+            const errorMessage = command.slice(7, -2);
+            error(errorMessage);
+        } else if (command.startsWith('print("') && command.endsWith('")')) {
+            // Обработка команд print
+            const message = command.slice(7, -2);
+            print(message);
+        } else {
+            // Обработка других команд
+            // ... Код для обработки других команд
         }
     }
 }
