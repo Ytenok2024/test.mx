@@ -21,6 +21,14 @@
                 print(`Ошибка: Значение для переменной ${name} не является числом`);
             }
         }
+        function numberSet(name, value) {
+    if (window[name] !== undefined && !isNaN(value)) {
+        window[name] = Number(value);
+        print(`Значение переменной ${name} изменено на ${value}`);
+    } else {
+        print(`Ошибка: Переменная ${name} не существует или значение не является числом`);
+    }
+}
 
         function loadAndCalculate() {
             const fileInput = document.getElementById('fileInput');
