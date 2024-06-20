@@ -62,10 +62,11 @@ function error(text) {
     console.error(text);
 }
 
-function newVariable(name, value) {
+function newVariable(name, value, tag) {
     if (!isNaN(value)) {
         window[name] = Number(value);
-        print(`Переменная ${name} создана со значением ${value}`);
+        variables[name] = { value: Number(value), tag: tag }; // Сохраняем значение и тег
+        print(`Переменная ${name} создана со значением ${value}${tag ? ` и тегом ${tag}` : ''}`);
     } else {
         error(`Ошибка: Значение для переменной ${name} не является числом`);
     }
@@ -96,10 +97,10 @@ function loadAndCalculate() {
 }
 
 function calculateExpressions(data) {
-    const newVarRegex = /number\.new\("([^"]*)",\s*(.*?)\)/g;
+    const newVarRegex = /number\.new\("([^"]*)",\s*(.*?)(?:,\s*#s\((.*?)\))?\)/g;
     let match;
     while ((match = newVarRegex.exec(data)) !== null) {
-        newVariable(match[1], match[2]);
+        newVariable(match[1], match[2], match[3]);
     }
 
     const errorRegex = /error\("([^"]*)"\)/g;
