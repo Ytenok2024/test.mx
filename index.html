@@ -1,8 +1,83 @@
-function numberSet(name, value) {
-    if (window[name] !== undefined && !isNaN(value)) {
-        window[name] = Number(value);
-        print(`Значение переменной ${name} изменено на ${value}`);
-    } else {
-        print(`Ошибка: Переменная ${name} не существует или значение не является числом`);
-    }
-}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Обработка Выражений</title>
+</head>
+<body>
+    <h1>Обработка выражений из файла</h1>
+    <input type="file" id="fileInput" accept=".mx">
+    <button onclick="loadAndCalculate()">Загрузить и Вычислить</button>
+    <script>
+        function print(text) {
+            console.log(text);
+        }
+
+        function newVariable(name, value) {
+            if (!isNaN(value)) {
+                window[name] = Number(value);
+                print(`Переменная ${name} создана со значением ${value}`);
+            } else {
+                print(`Ошибка: Значение для переменной ${name} не является числом`);
+            }
+        }
+
+        function numberSet(name, value) {
+            if (window[name] !== undefined && !isNaN(value)) {
+                window[name] = Number(value);
+                print(`Значение переменной ${name} изменено на ${value}`);
+            } else {
+                print(`Ошибка: Переменная ${name} не существует или значение не является числом`);
+            }
+        }
+
+        function loadAndCalculate() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    calculateExpressions(content);
+                };
+                reader.readAsText(file);
+            } else {
+                print('Файл не выбран');
+            }
+        }
+
+        function calculateExpressions(data) {
+            // Сначала ищем и создаем переменные
+            const newVarRegex = /number\.new\("([^"]*)",\s*(.*?)\)/g;
+            let match;
+            while ((match = newVarRegex.exec(data)) !== null) {
+                newVariable(match[1], match[2]);
+            }
+
+            // Затем обрабатываем остальные выражения
+            const regex = /<\?(.*?)\?>/g;
+            while ((match = regex.exec(data)) !== null) {
+                try {
+                    // Проверяем, не является ли выражение командой создания переменной
+                    if (!newVarRegex.test(match[1])) {
+                        const expression = match[1];
+                        const result = eval(expression);
+                        print(`Выражение: ${expression}, Результат: ${result}`);
+                    }
+                } catch (error) {
+                    console.error(`Ошибка при вычислении выражения: ${match[1]}`);
+                }
+            }
+
+            // Обработка команд print
+            const printRegex = /print\("([^"]*)"\)/g;
+            while ((match = printRegex.exec(data)) !== null) {
+                // Проверяем, не является ли строка командой создания переменной
+                if (!newVarRegex.test(match[1])) {
+                    print(match[1]);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
