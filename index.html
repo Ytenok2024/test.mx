@@ -81,78 +81,99 @@
         <!-- Ваш JavaScript код здесь -->
     </div>
     <script>
-                function print(text) {
-    console.log(text);
-}
+        // Объявление объекта для хранения переменных
+        const variables = {};
 
-function error(text) {
-    console.error(text);
-}
-
-function newVariable(name, value) {
-    if (!isNaN(value)) {
-        window[name] = Number(value);
-        print(`Переменная ${name} создана со значением ${value}`);
-    } else {
-        error(`Ошибка: Значение для переменной ${name} не является числом`);
-    }
-}
-
-function numberSet(name, value) {
-    if (window[name] !== undefined && !isNaN(value)) {
-        window[name] = Number(value);
-        print(`Значение переменной ${name} изменено на ${value}`);
-    } else {
-        error(`Ошибка: Переменная ${name} не существует или значение не является числом`);
-    }
-}
-
-function loadAndCalculate() {
-    const fileInput = document.getElementById('fileInput');
-    const file = fileInput.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const content = e.target.result;
-            calculateExpressions(content);
-        };
-        reader.readAsText(file);
-    } else {
-        error('Файл не выбран');
-    }
-}
-
-function calculateExpressions(data) {
-    const newVarRegex = /number\.new\("([^"]*)",\s*(.*?)\)/g;
-    let match;
-    while ((match = newVarRegex.exec(data)) !== null) {
-        newVariable(match[1], match[2]);
-    }
-
-    const errorRegex = /error\("([^"]*)"\)/g;
-    while ((match = errorRegex.exec(data)) !== null) {
-        error(match[1]);
-    }
-
-    const printRegex = /print\("([^"]*)"\)/g;
-    while ((match = printRegex.exec(data)) !== null) {
-        print(match[1]);
-    }
-
-    const regex = /<\?(.*?)\?>/g;
-    while ((match = regex.exec(data)) !== null) {
-        try {
-            if (!newVarRegex.test(match[1]) && !errorRegex.test(match[1]) && !printRegex.test(match[1])) {
-                const expression = match[1];
-                const result = eval(expression);
-                print(`Выражение: ${expression}, Результат: ${result}`);
-            }
-        } catch (e) {
-            error(`Ошибка при вычислении выражения: ${match[1]}`);
+        function print(text) {
+            console.log(text);
         }
-    }
-}
 
+        function error(text) {
+            console.error(text);
+        }
+
+        function newVariable(name, value) {
+            if (!isNaN(value)) {
+                variables[name] = Number(value);
+                print(`Переменная ${name} создана со значением ${value}`);
+            } else {
+                error(`Ошибка: Значение для переменной ${name} не является числом`);
+            }
+        }
+
+        function numberSet(name, value) {
+            if (variables[name] !== undefined && !isNaN(value)) {
+                variables[name] = Number(value);
+                print(`Значение переменной ${name} изменено на ${value}`);
+            } else {
+                error(`Ошибка: Переменная ${name} не существует или значение не является числом`);
+            }
+        }
+
+        function loadAndCalculate() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    calculateExpressions(content);
+                };
+                reader.readAsText(file);
+            } else {
+                error('Файл не выбран');
+            }
+        }
+
+        function calculateExpressions(data) {
+            const newVarRegex = /number\.new\("([^"]*)",\s*(.*?)\)/g;
+            let match;
+            while ((match = newVarRegex.exec(data)) !== null) {
+                newVariable(match[1], match[2]);
+            }
+
+            const errorRegex = /error\("([^"]*)"\)/g;
+            while ((match = errorRegex.exec(data)) !== null) {
+                error(match[1]);
+            }
+
+            const printRegex = /print\("([^"]*)"\)/g;
+            while ((match = printRegex.exec(data)) !== null) {
+                print(match[1]);
+            }
+
+            const regex = /<\?(.*?)\?>/g;
+            while ((match = regex.exec(data)) !== null) {
+                try {
+                    if (!newVarRegex.test(match[1]) && !errorRegex.test(match[1]) && !printRegex.test(match[1])) {
+                        const expression = match[1];
+                        const result = eval(expression);
+                        print(`Выражение: ${expression}, Результат: ${result}`);
+                    }
+                } catch (e) {
+                    error(`Ошибка при вычислении выражения: ${match[1]}`);
+                }
+            }
+        }
+
+        function processVariableChange(data) {
+            const changeVarRegex = /<!([^+]+)\+(\d+)!>/g;
+            let match;
+            while ((match = changeVarRegex.exec(data)) !== null) {
+                const varName = match[1];
+                const numberToAdd = parseInt(match[2], 10);
+                if (variables[varName] !== undefined) {
+                    variables[varName] += numberToAdd;
+                    print(`Значение переменной ${varName} изменено на ${variables[varName]}`);
+                } else {
+                    error(`Ошибка: Переменная ${varName} не существует`);
+                }
+            }
+        }
+
+        // Пример использования:
+        variables['clicks'] = 5; // Исходное значение переменной 'clicks'
+        processVariableChange('<!clicks+1!>'); // После этого вызова значение 'clicks' станет 6
     </script>
 </body>
 </html>
