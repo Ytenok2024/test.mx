@@ -177,7 +177,7 @@
         // Функция для вызова функций, определенных в .mx файле
 function callFunction(functionName, ...args) {
     if (typeof variables[functionName] === 'function') {
-        return variables[functionName](...args    } else {
+        return variables[functionName](...args)    } else {
         error(`Ошибка: Функция ${functionName} не определена`);
     }
 }
