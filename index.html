@@ -118,6 +118,7 @@
                 reader.onload = function(e) {
                     const content = e.target.result;
                     calculateExpressions(content);
+                    processVariableChange(content); // Добавлен вызов новой функции
                 };
                 reader.readAsText(file);
             } else {
@@ -157,19 +158,20 @@
         }
 
         function processVariableChange(data) {
-            const changeVarRegex = /<!([^+]+)\+(\d+)!>/g;
-            let match;
-            while ((match = changeVarRegex.exec(data)) !== null) {
-                const varName = match[1];
-                const numberToAdd = parseInt(match[2], 10);
-                if (variables[varName] !== undefined) {
-                    variables[varName] += numberToAdd;
-                    print(`Значение переменной ${varName} изменено на ${variables[varName]}`);
-                } else {
-                    error(`Ошибка: Переменная ${varName} не существует`);
-                }
-            }
+    // Регулярное выражение для поиска конструкции <!имя_переменной+число!>
+    const changeVarRegex = /<!([^+]+)\+(\d+)!>/g;
+    let match;
+    while ((match = changeVarRegex.exec(data)) !== null) {
+        const varName = match[1];
+        const numberToAdd = parseInt(match[2], 10);
+        if (variables[varName] !== undefined) {
+            variables[varName] += numberToAdd;
+            print(`Значение переменной ${varName} изменено на ${variables[varName]}`);
+        } else {
+            error(`Ошибка: Переменная ${varName} не существует`);
         }
+    }
+}
     </script>
 </body>
 </html>
