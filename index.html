@@ -1,198 +1,172 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Обработка Выражений</title>
-    <style>
-        /* Общие стили */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+<!DOCTYPE html> <html lang="ru"> <head> <meta charset="UTF-8"> <title>Обработка Выражений</title> <style> /* Общие стили */ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    /* Стилизация контейнера */
+    .container {
+        background-color: white;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    /* Стилизация заголовка */
+    h1 {
+        color: #333;
+        margin-bottom: 30px;
+    }
+
+    /* Стилизация кнопки и поля ввода */
+    #fileInput, button {
+        font-size: 16px;
+        padding: 10px 20px;
+        margin-bottom: 20px;
+        border: 2px solid #008CBA;
+        border-radius: 5px;
+        outline: none;
+        transition: all 0.3s ease;
+    }
+
+    /* Стилизация кнопки при наведении и фокусе */
+    button:hover, button:focus {
+        background-color: #005f73;
+        color: white;
+        border-color: #005f73;
+    }
+
+    /* Анимация для кнопки при нажатии */
+    button:active {
+        transform: scale(0.98);
+    }
+
+    /* Анимация загрузки */
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Иконка загрузки */
+    .loader {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 2s linear infinite;
+        margin: auto;
+    }
+</style>
+</head> <body> <div class="container"> <h1>Обработка выражений из файла</h1> <input type="file" id="fileInput" accept=".mx"> <button onclick="loadAndCalculate()">Загрузить и Вычислить</button> <div id="loader" class="loader" style="display: none;"></div> <!-- Ваш JavaScript код здесь --> </div> <script> // Объявление объекта для хранения переменных const variables = {};
+    function print(text) {
+        console.log(text);
+    }
+
+    function error(text) {
+        console.error(text);
+    }
+
+    function newVariable(name, value) {
+        if (!isNaN(value)) {
+            variables[name] = Number(value);
+            print(`Переменная ${name} создана со значением ${value}`);
+        } else {
+            error(`Ошибка: Значение для переменной ${name} не является числом`);
+        }
+    }
+
+    function numberSet(name, value) {
+        if (variables[name] !== undefined && !isNaN(value)) {
+            variables[name] = Number(value);
+            print(`Значение переменной ${name} изменено на ${value}`);
+        } else {
+            error(`Ошибка: Переменная ${name} не существует или значение не является числом`);
+        }
+    }
+
+    function loadAndCalculate() {
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                createFunctionsFromContent(content); // Вызываем функцию для создания функций
+                calculateExpressions(content);
+                processVariableChange(content);
+            };
+            reader.readAsText(file);
+        } else {
+            error('Файл не выбран');
+        }
+    }
+
+    function calculateExpressions(data) {
+        const newVarRegex = /number\.new$"([^"]*)",\s*(.*?)$/g;
+        let match;
+        while ((match = newVarRegex.exec(data)) !== null) {
+            newVariable(match[1], match[2]);
         }
 
-        /* Стилизация контейнера */
-        .container {
-            background-color: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
+        const errorRegex = /error$"([^"]*)"$/g;
+        while ((match = errorRegex.exec(data)) !== null) {
+            error(match[1]);
         }
 
-        /* Стилизация заголовка */
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
+        const printRegex = /print$"([^"]*)"$/g;
+        while ((match = printRegex.exec(data)) !== null) {
+            print(match[1]);
         }
 
-        /* Стилизация кнопки и поля ввода */
-        #fileInput, button {
-            font-size: 16px;
-            padding: 10px 20px;
-            margin-bottom: 20px;
-            border: 2px solid #008CBA;
-            border-radius: 5px;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        /* Стилизация кнопки при наведении и фокусе */
-        button:hover, button:focus {
-            background-color: #005f73;
-            color: white;
-            border-color: #005f73;
-        }
-
-        /* Анимация для кнопки при нажатии */
-        button:active {
-            transform: scale(0.98);
-        }
-
-        /* Анимация загрузки */
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Иконка загрузки */
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 2s linear infinite;
-            margin: auto;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Обработка выражений из файла</h1>
-        <input type="file" id="fileInput" accept=".mx">
-        <button onclick="loadAndCalculate()">Загрузить и Вычислить</button>
-        <div id="loader" class="loader" style="display: none;"></div>
-        <!-- Ваш JavaScript код здесь -->
-    </div>
-    <script>
-        // Объявление объекта для хранения переменных
-        const variables = {};
-
-        function print(text) {
-            console.log(text);
-        }
-
-        function error(text) {
-            console.error(text);
-        }
-
-        function newVariable(name, value) {
-            if (!isNaN(value)) {
-                variables[name] = Number(value);
-                print(`Переменная ${name} создана со значением ${value}`);
-            } else {
-                error(`Ошибка: Значение для переменной ${name} не является числом`);
-            }
-        }
-
-        function numberSet(name, value) {
-            if (variables[name] !== undefined && !isNaN(value)) {
-                variables[name] = Number(value);
-                print(`Значение переменной ${name} изменено на ${value}`);
-            } else {
-                error(`Ошибка: Переменная ${name} не существует или значение не является числом`);
-            }
-        }
-
-        function loadAndCalculate() {
-            const fileInput = document.getElementById('fileInput');
-            const file = fileInput.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const content = e.target.result;
-                    createFunctionsFromContent(content); // Вызываем функцию для создания функций
-                    calculateExpressions(content);
-                    processVariableChange(content);
-                };
-                reader.readAsText(file);
-            } else {
-                error('Файл не выбран');
-            }
-        }
-
-        function calculateExpressions(data) {
-            const newVarRegex = /number\.new\("([^"]*)",\s*(.*?)\)/g;
-            let match;
-            while ((match = newVarRegex.exec(data)) !== null) {
-                newVariable(match[1], match[2]);
-            }
-
-            const errorRegex = /error\("([^"]*)"\)/g;
-            while ((match = errorRegex.exec(data)) !== null) {
-                error(match[1]);
-            }
-
-            const printRegex = /print\("([^"]*)"\)/g;
-            while ((match = printRegex.exec(data)) !== null) {
-                print(match[1]);
-            }
-
-            const regex = /<\?(.*?)\?>/g;
-            while ((match = regex.exec(data)) !== null) {
-                try {
-                    if (!newVarRegex.test(match[1]) && !errorRegex.test(match[1]) && !printRegex.test(match[1])) {
-                        const expression = match[1];
-                        const result = eval(expression);
-                        print(`Выражение: ${expression}, Результат: ${result}`);
-                    }
-                } catch (e) {
-                    error(`Ошибка при вычислении выражения: ${match[1]}`);
+        const regex = /<\?(.*?)\?>/g;
+        while ((match = regex.exec(data)) !== null) {
+            try {
+                if (!newVarRegex.test(match[1]) && !errorRegex.test(match[1]) && !printRegex.test(match[1])) {
+                    const expression = match[1];
+                    const result = eval(expression);
+                    print(`Выражение: ${expression}, Результат: ${result}`);
                 }
+            } catch (e) {
+                error(`Ошибка при вычислении выражения: ${match[1]}`);
             }
         }
+    }
 
-        function createFunctionsFromContent(data) {
-            const functionRegex = /function\s+"(\w+)"\s*\((.*?)\)\s*{([\s\S]*?)}/g;
-            let match;
-            while ((match = functionRegex.exec(data)) !== null) {
-                const functionName = match[1];
-                const params = match[2] ? match[2].split(',').map(param => param.trim()) : [];
-                const functionBody = match[3].trim();
+    function createFunctionsFromContent(data) {
+// Регулярное выражение для поиска определения функции
+const functionRegex = /function\s+"(\w+)"\s*$(.*?)$\s*{([\s\S]*?)}/g;
+let match;
+while ((match = functionRegex.exec(data)) !== null) {
+    const functionName = match[1];
+    const params = match[2] ? match[2].split(',').map(param => param.trim()) : [];
+    const functionBody = match[3].trim();
 
-                const newFunction = new Function(...params, functionBody.replace(/<\?(.*?)\?>/g, ''));
-                variables[functionName] = newFunction;
-                print(`Функция ${functionName} создана.`);
+    // Создаем новую функцию и добавляем ее в объект variables
+    const newFunction = new Function(...params, functionBody.replace(/<\?(.*?)\?>/g, ''));
+    variables[functionName] = newFunction;
+    print(`Функция ${functionName} создана.`);
+}
+}
+
+    // Функция для вызова функций, определенных в .mx файле
+function callFunction(functionName, ...args) {
+if (typeof variables[functionName] === 'function') {
+return variablesfunctionName } else {
+error(Ошибка: Функция ${functionName} не определена);
+}
+}
+
+    function processVariableChange(data) {
+        // Регулярное выражение для поиска конструкции <!имя_переменной+число!>
+        const changeVarRegex = /<!([^+]+)\+(\d+)!>/g;
+        let match;
+        while ((match = changeVarRegex.exec(data)) !== null) {
+            const varName = match[1];
+            const numberToAdd = parseInt(match[2], 10);
+            if (variables[varName] !== undefined) {
+                variables[varName] += numberToAdd;
+                print(`Значение переменной ${varName} изменено на ${variables[varName]}`);
+            } else {
+                error(`Ошибка: Переменная ${varName} не существует`);
             }
         }
-
-        function callFunction(functionName, ...args) {
-            if (typeof variables[functionName] === 'function') {
-                return variables[functionName](...args            } else {
-                error(`Ошибка: Функция ${functionName} не определена`);
-            }
-        }
-
-        function processVariableChange(data) {
-            const changeVarRegex = /<!([^+]+)\+(\d+)!>/g;
-            let match;
-            while ((match = changeVarRegex.exec(data)) !== null) {
-                const varName = match[1];
-                const numberToAdd = parseInt(match[2], 10);
-                if (variables[varName] !== undefined) {
-                    variables[varName] += numberToAdd;
-                    print(`Значение переменной ${varName} изменено на ${variables[varName]}`);
-                } else {
-                    error(`Ошибка: Переменная ${varName} не существует`);
-                }
-            }
-        }
-    </script>
-</body>
-</html>
+    }
+</script>
+</body> </html>
