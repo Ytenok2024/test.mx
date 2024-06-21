@@ -110,21 +110,22 @@
             }
         }
 
-        function loadAndCalculate() {
-            const fileInput = document.getElementById('fileInput');
-            const file = fileInput.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const content = e.target.result;
-                    calculateExpressions(content);
-                    processVariableChange(content); // Добавлен вызов новой функции
-                };
-                reader.readAsText(file);
-            } else {
-                error('Файл не выбран');
-            }
-        }
+       function loadAndCalculate() {
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const content = e.target.result;
+            createFunctionsFromContent(content); // Вызываем функцию для создания функций
+            calculateExpressions(content);
+            processVariableChange(content);
+        };
+        reader.readAsText(file);
+    } else {
+        error('Файл не выбран');
+    }
+}
 
         function calculateExpressions(data) {
             const newVarRegex = /number\.new\("([^"]*)",\s*(.*?)\)/g;
