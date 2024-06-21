@@ -159,32 +159,27 @@
         }
 
         function createFunctionsFromContent(data) {
-    // Регулярное выражение для поиска определения функции
-    const functionRegex = /function\s+"(\w+)"\s*\((.*?)\)\s*{([\s\S]*?)}/g;
-    let match;
-    while ((match = functionRegex.exec(data)) !== null) {
-        const functionName = match[1];
-        const params = match[2] ? match[2].split(',').map(param => param.trim()) : [];
-        const functionBody = match[3].trim();
+            const functionRegex = /function\s+"(\w+)"\s*\((.*?)\)\s*{([\s\S]*?)}/g;
+            let match;
+            while ((match = functionRegex.exec(data)) !== null) {
+                const functionName = match[1];
+                const params = match[2] ? match[2].split(',').map(param => param.trim()) : [];
+                const functionBody = match[3].trim();
 
-        // Создаем новую функцию и добавляем ее в объект variables
-        const newFunction = new Function(...params, functionBody.replace(/<\?(.*?)\?>/g, ''));
-        variables[functionName] = newFunction;
-        print(`Функция ${functionName} создана.`);
-    }
-}
+                const newFunction = new Function(...params, functionBody.replace(/<\?(.*?)\?>/g, ''));
+                variables[functionName] = newFunction;
+                print(`Функция ${functionName} создана.`);
+            }
+        }
 
-        // Функция для вызова функций, определенных в .mx файле
-function callFunction(functionName, ...args) {
-    if (typeof variables[functionName] === 'function') {
-        return variables[functionName](...args)    } else {
-        error(`Ошибка: Функция ${functionName} не определена`);
-    }
-}
-
+        function callFunction(functionName, ...args) {
+            if (typeof variables[functionName] === 'function') {
+                return variables[functionName](...args            } else {
+                error(`Ошибка: Функция ${functionName} не определена`);
+            }
+        }
 
         function processVariableChange(data) {
-            // Регулярное выражение для поиска конструкции <!имя_переменной+число!>
             const changeVarRegex = /<!([^+]+)\+(\d+)!>/g;
             let match;
             while ((match = changeVarRegex.exec(data)) !== null) {
