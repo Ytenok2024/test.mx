@@ -159,20 +159,20 @@
         }
 
         function createFunctionsFromContent(data) {
-            // Регулярное выражение для поиска определения функции
-            const functionRegex = /function\s+"(\w+)"\s*\((.*?)\)\s*{([\s\S]*?)}/g;
-            let match;
-            while ((match = functionRegex.exec(data)) !== null) {
-                const functionName = match[1];
-                const params = match[2] ? match[2].split(',').map(param => param.trim()) : [];
-                const functionBody = match[3].trim();
+    // Регулярное выражение для поиска определения функции
+    const functionRegex = /function\s+"(\w+)"\s*\((.*?)\)\s*{([\s\S]*?)}/g;
+    let match;
+    while ((match = functionRegex.exec(data)) !== null) {
+        const functionName = match[1];
+        const params = match[2] ? match[2].split(',').map(param => param.trim()) : [];
+        const functionBody = match[3].trim();
 
-                // Создаем новую функцию и добавляем ее в объект variables
-                const newFunction = new Function(...params, functionBody);
-                variables[functionName] = newFunction;
-                print(`Функция ${functionName} создана.`);
-            }
-        }
+        // Создаем новую функцию и добавляем ее в объект variables
+        const newFunction = new Function(...params, functionBody.replace(/<\?(.*?)\?>/g, ''));
+        variables[functionName] = newFunction;
+        print(`Функция ${functionName} создана.`);
+    }
+}
 
         // Функция для вызова функций, определенных в .mx файле
 function callFunction(functionName, ...args) {
