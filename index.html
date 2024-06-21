@@ -170,3 +170,50 @@ function processVariableChange(data) {
 
 </script>
 </body> </html>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Анимированная Кнопка</title>
+    <style>
+        .button {
+            padding: 10px 25px;
+            font-size: 16px;
+            text-align: center;
+            cursor: pointer;
+            outline: none;
+            color: #fff;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 9px #999;
+            transition: all 0.5s;
+        }
+
+        .button:hover {background-color: #3e8e41}
+
+        .button:active {
+            background-color: #3e8e41;
+            box-shadow: 0 5px #666;
+            transform: translateY(4px);
+        }
+
+        @keyframes animateButton {
+            0%   {background-color: #4CAF50; left: 0px; top: 0px;}
+            50%  {background-color: #3e8e41; left: 200px; top: 200px;}
+            100% {background-color: #4CAF50; left: 0px; top: 0px;}
+        }
+
+        .button:hover {
+            animation-name: animateButton;
+            animation-duration: 2s;
+            animation-iteration-count: infinite;
+        }
+    </style>
+</head>
+<body>
+
+<button class="button" onclick="OnClick()">Проверить функцию OnClick</button>
+
+</body>
+</html>
